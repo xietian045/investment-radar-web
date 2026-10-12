@@ -1,8 +1,108 @@
 'use strict';
-const fundingUI = Object.fromEntries(['funding-search','funding-period','funding-country','funding-sector','funding-round','funding-investor','funding-watch-only','funding-clear','funding-export','funding-retry','funding-status','funding-count','funding-cards','funding-sectors','funding-stat-events','funding-stat-companies','funding-stat-investors','watch-notice'].map(id => [id,document.getElementById(id)]));
+const fundingUI = Object.fromEntries(['funding-search','funding-period','funding-country','funding-sector','funding-round','funding-investor','funding-watch-only','funding-clear','funding-export','funding-retry','funding-status','funding-count','funding-cards','funding-sectors','funding-stat-events','funding-stat-companies','funding-stat-investors','watch-notice','research-status','industry-research-cards'].map(id => [id,document.getElementById(id)]));
 const WATCH_KEY = 'investment-radar.funding-watch.v1';
 const sectorRoles = {AI:['产品运营','开发者生态','技术内容','商务拓展'],企业软件:['企业销售','客户成功','解决方案','产品营销'],智能硬件:['项目运营','供应链','产品管理','行业销售']};
 let fundingEntries = [], fundingBusy = false, watchStorageOK = true;
+let companyResearch = new Map(), industryInsights = [];
+function validateCompanyResearch(data) {
+  if (data?.version !== 1 || !validDay(data.updated_on) || typeof data.method !== 'string' || !Array.isArray(data.profiles) || data.profiles.length > 1000 || !Array.isArray(data.industry_insights) || data.industry_insights.length > 10) throw new Error('Invalid research data');
+  const result = new Map();
+  const string = value => typeof value === 'string' && value.trim() && value.length <= 5000;
+  const strings = values => Array.isArray(values) && values.length <= 12 && values.every(string);
+  for (const profile of data.profiles) {
+    if (!profile || !string(profile.id) || result.has(profile.id) || !validDay(profile.checked_on)) throw new Error('Invalid research identity');
+    const business = profile.business, hiring = profile.hiring, forecast = profile.forecast;
+    if (!business || !['overview','customers','workflow_example','monetization'].every(key => string(business[key])) || !strings(business.products)) throw new Error('Invalid business profile');
+    if (!Array.isArray(business.sources) || !business.sources.length || business.sources.length > 10 || business.sources.some(source => !string(source.label) || !fUrl(source.url))) throw new Error('Missing business sources');
+    if (!hiring || !['岗位要求已核验','仅招聘方向介绍','具体岗位证据不足'].includes(hiring.evidence_level) || !string(hiring.coverage) || !string(hiring.limits) || !Array.isArray(hiring.jobs) || hiring.jobs.length > 10) throw new Error('Invalid hiring evidence');
+    if ((hiring.evidence_level === '岗位要求已核验') !== Boolean(hiring.jobs.length)) throw new Error('Inconsistent hiring evidence');
+    for (const job of hiring.jobs) if (!job || !string(job.title) || !fUrl(job.url) || !validDay(job.checked_on) || !strings(job.requirements) || !job.requirements.length || !string(job.responsibility) || !string(job.signal)) throw new Error('Invalid verified job');
+    if (!forecast || !['horizon','basis','base','upside','downside','opportunity','invalidation'].every(key => string(forecast[key])) || !strings(forecast.talent) || !strings(forecast.checkpoints) || !forecast.checkpoints.length) throw new Error('Invalid forecast boundaries');
+    result.set(profile.id,profile);
+  }
+  for (const insight of data.industry_insights) if (!insight || !['theme','direction','opportunity','validation'].every(key => string(insight[key])) || !strings(insight.talent) || !strings(insight.companies) || insight.companies.some(id => !result.has(id))) throw new Error('Invalid industry evidence');
+  return result;
+}
+function profileSearchText(profile) {
+  if (!profile) return '';
+  const {business,hiring,forecast} = profile;
+  return [business.overview,...business.products,business.customers,business.workflow_example,business.monetization,hiring.evidence_level,hiring.coverage,...hiring.jobs.flatMap(job => [job.title,...job.requirements,job.responsibility,job.signal]),forecast.base,forecast.upside,forecast.downside,...forecast.talent,forecast.opportunity,...forecast.checkpoints,forecast.invalidation].join(' ');
+}
+function researchParagraph(section,title,value) { section.append(fElement('h4','',title),fElement('p','',value)); }
+function researchList(section,title,values) { section.append(fElement('h4','',title)); const list = fElement('ul','research-list',''); values.forEach(value => list.append(fElement('li','',value))); section.append(list); }
+function renderBusinessOverview(card,profile) {
+  const section = fElement('section','business-overview','');
+  researchParagraph(section,'主营业务概况',profile.business.overview);
+  researchParagraph(section,'交付什么',profile.business.products.join(' / '));
+  researchParagraph(section,'谁会使用',profile.business.customers);
+  const sources = fElement('div','research-sources','');
+  profile.business.sources.forEach(source => sources.append(fundingLink(source.label + ' ↗',source.url)));
+  section.append(sources); card.append(section);
+}
+function renderCompanyResearch(card,row,profile) {
+  const business = fElement('details','pilot-analysis company-detail','');
+  business.append(fElement('summary','','业务流程与收费方式'));
+  researchParagraph(business,'使用流程示例',profile.business.workflow_example);
+  researchParagraph(business,'商业模式与披露边界',profile.business.monetization);
+  card.append(business);
+  const details = fElement('details','pilot-analysis company-detail','');
+  details.append(fElement('summary','','招聘要求与未来发展情景'));
+  details.append(fElement('p','evidence-label',`${profile.hiring.evidence_level} · 资料核对于 ${profile.checked_on}`));
+  details.append(fElement('p','',profile.hiring.coverage));
+  for (const job of profile.hiring.jobs) {
+    const section = fElement('section','job-evidence','');
+    section.append(fElement('h4','',job.title));
+    section.append(fundingLink(`岗位原文 · 核对于 ${job.checked_on} ↗`,job.url));
+    researchList(section,'实际要求摘要',job.requirements);
+    researchParagraph(section,'岗位职责',job.responsibility);
+    researchParagraph(section,'业务信号（推断）',job.signal);
+    details.append(section);
+  }
+  if (profile.hiring.evidence_level === '仅招聘方向介绍') details.append(fundingLink('公司招聘方向介绍 ↗',profile.business.sources[0].url));
+  if (row.careers_url) details.append(fundingLink('招聘入口 ↗',row.careers_url));
+  researchParagraph(details,'招聘证据的限制',profile.hiring.limits);
+  details.append(fElement('h4','forecast-heading',profile.forecast.horizon));
+  details.append(fElement('p','analysis-meta',`推断依据：${profile.forecast.basis}`));
+  for (const [label,key] of [['基准情景','base'],['乐观情景','upside'],['风险情景','downside']]) researchParagraph(details,label,profile.forecast[key]);
+  researchList(details,'未来人才需求方向（推断）',profile.forecast.talent);
+  researchParagraph(details,'可研究的投资环节及条件',profile.forecast.opportunity);
+  researchList(details,'后续验证指标',profile.forecast.checkpoints);
+  researchParagraph(details,'什么情况会让判断失效',profile.forecast.invalidation);
+  details.append(fElement('p','funding-note','以上为基于资料时点的条件研究，不是业绩承诺；招聘可能是替补或储备。未核验具体投资准入、财务状况和实时估值。'));
+  card.append(details);
+}
+function renderIndustryResearch() {
+  fundingUI['industry-research-cards'].replaceChildren();
+  for (const insight of industryInsights) {
+    const card = fElement('article','industry-research-card','');
+    card.append(fElement('h3','',insight.theme));
+    researchParagraph(card,'方向假设',insight.direction);
+    researchList(card,'人才需求方向',insight.talent);
+    researchParagraph(card,'投资观察',insight.opportunity);
+    researchParagraph(card,'成立条件与失效信号',insight.validation);
+    const sources = fElement('div','research-sources','');
+    for (const id of insight.companies) {
+      const profile = companyResearch.get(id), row = fundingEntries.find(entry => entry.id === id);
+      if (profile && row) sources.append(fundingLink(row.company + ' 依据 ↗',profile.hiring.jobs[0]?.url || profile.business.sources[0].url));
+    }
+    card.append(sources); fundingUI['industry-research-cards'].append(card);
+  }
+  if (!industryInsights.length) fundingUI['industry-research-cards'].append(fElement('p','funding-note','行业研究暂未加载，融资列表仍可使用。'));
+}
+async function loadCompanyResearch() {
+  const controller = new AbortController(), timer = setTimeout(() => controller.abort(),15000);
+  try {
+    const response = await fetch('./company-research.json?v=20261012-research1',{signal:controller.signal,cache:'no-store'});
+    if (!response.ok) throw new Error('Research unavailable');
+    const data = await response.json(); companyResearch = validateCompanyResearch(data); industryInsights = data.industry_insights;
+    const verified = [...companyResearch.values()].filter(profile => profile.hiring.evidence_level === '岗位要求已核验').length;
+    const directional = [...companyResearch.values()].filter(profile => profile.hiring.evidence_level === '仅招聘方向介绍').length;
+    fundingUI['research-status'].textContent = `公司研究 · ${companyResearch.size} 家主营概况 · ${verified} 家有已核验岗位要求 · ${directional} 家仅有招聘方向介绍 · 整理于 ${data.updated_on}。发展情景是条件推断，不保证结果。`;
+    renderFunding();
+  } catch {
+    fundingUI['research-status'].textContent = '公司研究暂时无法加载，融资信息仍可使用。请检查 company-research.json 已上传至仓库根目录后刷新。';
+  } finally { clearTimeout(timer); }
+}
 function fText(value) { return value == null ? '' : String(value); }
 function fElement(tag, className, value) { const node = document.createElement(tag); node.className = className; node.textContent = value; return node; }
 function fUrl(value) { try { const url = new URL(value); return ['https:','http:'].includes(url.protocol) && !url.username && !url.password ? url.href : null; } catch { return null; } }
@@ -43,7 +143,7 @@ function fundingFilters() { return {keyword:fundingUI['funding-search'].value.tr
 function selectFunding(entries,filters,today = beijingToday()) {
   const cutoff = filters.period === 'all' ? '' : cutoffDay(today,Number(filters.period) || 90);
   return entries.filter(row => {
-    const search = [row.company,row.sector,row.subsector,row.summary,row.round,row.research_focus,row.country === 'CN' ? '中国' : '美国',...row.investors.map(investor => investor.name)].join(' ').toLocaleLowerCase();
+    const search = [row.company,row.sector,row.subsector,row.summary,row.round,row.research_focus,row.country === 'CN' ? '中国' : '美国',...row.investors.map(investor => investor.name),profileSearchText(companyResearch.get(row.id))].join(' ').toLocaleLowerCase();
     return row.announced_on <= today && (!cutoff || row.announced_on >= cutoff)
       && (!filters.keyword || search.includes(filters.keyword)) && (!filters.country || row.country === filters.country)
       && (!filters.sector || row.sector === filters.sector)
@@ -61,6 +161,7 @@ function updateInvestorOptions() {
   if ([...fundingUI['funding-investor'].options].some(option => option.value === selected)) fundingUI['funding-investor'].value = selected;
 }
 function renderFunding() {
+  renderIndustryResearch();
   const focusedWatch = document.activeElement?.dataset?.watchId;
   const entries = selectFunding(fundingEntries,fundingFilters());
   fundingUI['funding-count'].textContent = `显示 ${entries.length} 条 · 共收录 ${fundingEntries.length} 条`;
@@ -86,12 +187,16 @@ function renderFunding() {
     const saved = watchlist.has(row.id), watch = fElement('button','watch-button',saved ? '已在观察名单' : '加入观察名单');
     watch.type = 'button'; watch.dataset.watchId = row.id; watch.setAttribute('aria-pressed',String(saved)); watch.setAttribute('aria-label',`${saved ? '移出' : '加入'}观察名单：${row.company}`); watch.addEventListener('click',() => toggleWatch(row.id)); meta.append(watch);
     card.append(meta,fElement('h3','',row.company),fElement('p','funding-subsector',row.subsector));
+    const profile = companyResearch.get(row.id);
+    if (profile) renderBusinessOverview(card,profile);
     const facts = fElement('dl','funding-facts',''); fundingFact(facts,'融资轮次',row.round); fundingFact(facts,'本轮金额',row.amount); fundingFact(facts,'估值',row.valuation); fundingFact(facts,'披露状态',row.deal_status); card.append(facts);
     card.append(fElement('p','summary',row.summary));
     const investors = fElement('div','investor-chips','');
     investors.append(fElement('span','funding-label','披露投资方'));
     row.investors.forEach(investor => { const button = fElement('button','investor-chip',investor.name); button.type = 'button'; button.title = investor.role; button.setAttribute('aria-label',`筛选投资方 ${investor.name}（${investor.role}）`); button.addEventListener('click',() => { fundingUI['funding-investor'].value = investor.name; renderFunding(); fundingUI['funding-investor'].focus(); }); investors.append(button); });
     card.append(investors,fElement('p','funding-note',row.investor_note));
+    if (profile) renderCompanyResearch(card,row,profile);
+    else {
     const details = fElement('details','pilot-analysis',''); details.append(fElement('summary','','公司研究与岗位线索'));
     details.append(fElement('h4','','观察重点（研究提示）'),fElement('p','',row.research_focus));
     details.append(fElement('h4','','岗位方向（参考，非招聘事实）'),fElement('p','',sectorRoles[row.sector].join(' / ')));
@@ -99,6 +204,7 @@ function renderFunding() {
     if (row.verified_roles.length) details.append(fElement('p','',`核对页面列示：${row.verified_roles.join(' / ')}。岗位可能变化，请回原站确认。`));
     if (row.careers_url) details.append(fundingLink('查看招聘入口 ↗',row.careers_url));
     details.append(fElement('p','funding-note',`来源核对于 ${row.checked_on}；公司披露未经过本工具独立财务审计。`)); card.append(details);
+    }
     const bottom = fElement('div','card-bottom funding-links',''); bottom.append(fundingLink('融资公告 ↗',row.source_url),fundingLink('公司官网 ↗',row.company_url),fElement('span','source',row.source_name)); card.append(bottom); fundingUI['funding-cards'].append(card);
   }
   if (!entries.length) fundingUI['funding-cards'].append(fElement('p','empty',fundingEntries.length ? '当前筛选没有匹配融资。可清除筛选或选择「全部已收录」。观察名单也受时间和其他筛选条件影响。' : '暂无已加载融资信息，请重试加载。'));
@@ -109,8 +215,11 @@ function renderFunding() {
 }
 function csvCell(value) { let cell = fText(value).replace(/[\r\n\t]/g,' '); if (/^[\u0000-\u0020]*[=+@-]/.test(cell)) cell = "'" + cell; return '"' + cell.replace(/"/g,'""') + '"'; }
 function fundingCSV(entries) {
-  const columns = ['公司','国家','赛道','细分方向','公告日期','轮次','本轮金额（原始口径）','估值（非融资额）','披露状态','投资方与角色','业务摘要','观察重点（研究提示）','招聘状态','招聘核对日期','公司官网','招聘入口','融资来源','核对日期'];
-  const rows = entries.map(row => [row.company,row.country,row.sector,row.subsector,row.announced_on,row.round,row.amount,row.valuation,row.deal_status,row.investors.map(investor => `${investor.name}（${investor.role}）`).join('；'),row.summary,row.research_focus,row.hiring_status,row.hiring_checked_on || '',row.company_url,row.careers_url || '',row.source_url,row.checked_on]);
+  const columns = ['公司','国家','赛道','细分方向','公告日期','轮次','本轮金额（原始口径）','估值（非融资额）','披露状态','投资方与角色','业务摘要','观察重点（研究提示）','招聘证据等级','招聘核对日期','公司官网','招聘入口','融资来源','核对日期','主营业务','产品','目标使用方','收费与披露边界','招聘要求摘要','岗位来源','预测依据与期限','基准情景（推断）','乐观情景（推断）','风险情景（推断）','人才方向（推断）','投资观察与条件','验证指标','失效信号'];
+  const rows = entries.map(row => {
+    const profile = companyResearch.get(row.id);
+    return [row.company,row.country,row.sector,row.subsector,row.announced_on,row.round,row.amount,row.valuation,row.deal_status,row.investors.map(investor => `${investor.name}（${investor.role}）`).join('；'),row.summary,row.research_focus,profile?.hiring.evidence_level || row.hiring_status,profile?.checked_on || row.hiring_checked_on || '',row.company_url,row.careers_url || '',row.source_url,row.checked_on,profile?.business.overview || '',profile?.business.products.join(' / ') || '',profile?.business.customers || '',profile?.business.monetization || '',profile?.hiring.jobs.map(job => `${job.title}：${job.requirements.join(' / ')}`).join('；') || '',profile?.hiring.jobs.map(job => job.url).join('；') || '',profile ? `${profile.forecast.horizon}；${profile.forecast.basis}` : '',profile?.forecast.base || '',profile?.forecast.upside || '',profile?.forecast.downside || '',profile?.forecast.talent.join(' / ') || '',profile?.forecast.opportunity || '',profile?.forecast.checkpoints.join(' / ') || '',profile?.forecast.invalidation || ''];
+  });
   return '\uFEFF' + [columns,...rows].map(row => row.map(csvCell).join(',')).join('\r\n');
 }
 function exportFunding() {
@@ -123,10 +232,10 @@ async function loadFunding() {
   fundingBusy = true; fundingUI['funding-retry'].disabled = true; fundingUI['funding-status'].textContent = '正在加载融资信息…';
   const controller = new AbortController(), timer = setTimeout(() => controller.abort(),15000);
   try {
-    const response = await fetch('./funding-data.json?v=20261012-funding1',{signal:controller.signal,cache:'no-store'});
+    const response = await fetch('./funding-data.json?v=20261012-research1',{signal:controller.signal,cache:'no-store'});
     if (!response.ok) throw new Error('Funding unavailable');
     const data = await response.json(); fundingEntries = validateFundingData(data); updateInvestorOptions(); renderFunding();
-    fundingUI['funding-status'].textContent = `人工核实样本 · 最近整理 ${data.updated_on} · ${data.coverage}`;
+    fundingUI['funding-status'].textContent = `人工核实样本 · 最近整理 ${data.updated_on} · 当前列表经核验后人工发布；自动发现的线索不直接上线。非全市场统计。`;
     fundingUI['funding-retry'].hidden = true;
   } catch {
     fundingUI['funding-status'].textContent = '融资数据暂时无法加载，请检查 funding-data.json 已上传至仓库根目录，然后点击重试。' + (fundingEntries.length ? ' 当前保留已加载记录。' : '');
@@ -137,7 +246,8 @@ fundingUI['funding-search'].addEventListener('input',renderFunding);
 for (const id of ['funding-period','funding-country','funding-sector','funding-round','funding-investor','funding-watch-only']) fundingUI[id].addEventListener('change',renderFunding);
 fundingUI['funding-clear'].addEventListener('click',() => { for (const id of ['funding-search','funding-country','funding-sector','funding-round','funding-investor']) fundingUI[id].value = ''; fundingUI['funding-period'].value = '90'; fundingUI['funding-watch-only'].checked = false; renderFunding(); });
 fundingUI['funding-export'].addEventListener('click',exportFunding);
-fundingUI['funding-retry'].addEventListener('click',loadFunding);
+fundingUI['funding-retry'].addEventListener('click',() => { loadFunding(); loadCompanyResearch(); });
 window.addEventListener('storage',event => { if (event.key === WATCH_KEY || event.key === null) { watchlist = readWatchlist(); watchNotice(); renderFunding(); } });
 watchNotice();
 loadFunding();
+loadCompanyResearch();
