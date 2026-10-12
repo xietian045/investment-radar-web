@@ -4,6 +4,35 @@
   "coverage": "人工核实的中美科技融资样本；非全市场统计，暂无自动采集。",
   "entries": [
     {
+      "id": "gudea-20261009-seed",
+      "company": "GUDEA",
+      "country": "US",
+      "sector": "AI",
+      "subsector": "叙事智能 / 企业声誉与舆情分析",
+      "announced_on": "2026-10-09",
+      "round": "种子轮",
+      "round_group": "OTHER",
+      "amount": "700 万美元",
+      "valuation": "未披露",
+      "deal_status": "公司新闻稿披露完成融资",
+      "investors": [
+        {"name":"Mudita Ventures","role":"联合领投"},
+        {"name":"Collide Capital","role":"联合领投"}
+      ],
+      "investor_note": "以公司2026年10月9日新闻稿为准；700万美元是本轮金额，不是累计融资。",
+      "summary": "美国叙事智能平台，公司披露完成700万美元种子阶段融资，资金用于产品开发、平台覆盖扩展及企业业务增长。",
+      "research_focus": "核查付费客户留存、预测效果与数据合规；公司对舆情预测的主张仍需独立验证。",
+      "company_url": "https://www.gudea.ai/",
+      "source_url": "https://www.prnewswire.com/news-releases/gudea-closes-oversubscribed-7-million-seed-round-to-scale-ai-powered-narrative-intelligence-302903335.html",
+      "source_name": "GUDEA 公司新闻稿 / PR Newswire",
+      "source_title": "GUDEA Closes Oversubscribed $7 Million Seed Round to Scale AI-Powered Narrative Intelligence",
+      "checked_on": "2026-10-12",
+      "careers_url": "https://www.gudea.ai/careers",
+      "hiring_status": "有招聘入口；具体岗位待核验",
+      "hiring_checked_on": "2026-10-12",
+      "verified_roles": []
+    },
+    {
       "id": "flow-20260930-b",
       "company": "Flow Engineering",
       "country": "US",
