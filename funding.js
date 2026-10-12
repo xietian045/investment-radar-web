@@ -115,7 +115,7 @@ async function loadCompanyResearch() {
   let stage = 'connection';
   try {
     fundingUI['research-status'].textContent = '正在加载公司业务与招聘研究，连接较慢时会自动重试…';
-    const data = await readPublicJSON('./company-research.json?v=20261012-research2');
+    const data = await readPublicJSON('./company-research.json?v=20261012-domestic1');
     stage = 'validate';
     const validated = validateCompanyResearch(data);
     companyResearch = validated; industryInsights = data.industry_insights;
@@ -156,7 +156,8 @@ function validateFundingData(data) {
   for (const row of data.entries) {
     if (!row || !validDay(row.announced_on) || !validDay(row.checked_on) || !['CN','US'].includes(row.country) || !Object.hasOwn(sectorRoles,row.sector) || !['A','B','C','OTHER'].includes(row.round_group)) throw new Error('Invalid funding record');
     for (const key of ['id','company','subsector','round','amount','valuation','deal_status','summary','research_focus','source_name','source_title','hiring_status','investor_note']) if (typeof row[key] !== 'string' || !row[key].trim() || row[key].length > 3000) throw new Error('Invalid funding text');
-    if (!fUrl(row.source_url) || !fUrl(row.company_url) || (row.careers_url && !fUrl(row.careers_url))) throw new Error('Invalid funding URL');
+    if (!fUrl(row.source_url) || (row.company_url && !fUrl(row.company_url)) || (row.careers_url && !fUrl(row.careers_url))) throw new Error('Invalid funding URL');
+    if (row.amount_scope && !['single','combined','cumulative','undisclosed'].includes(row.amount_scope)) throw new Error('Invalid amount scope');
     if (!Array.isArray(row.investors) || row.investors.length > 50 || row.investors.some(investor => !investor || typeof investor.name !== 'string' || !investor.name.trim() || typeof investor.role !== 'string')) throw new Error('Invalid investors');
     if (!Array.isArray(row.verified_roles) || row.verified_roles.some(role => typeof role !== 'string')) throw new Error('Invalid roles');
     if (row.hiring_checked_on && !validDay(row.hiring_checked_on)) throw new Error('Invalid hiring date');
@@ -216,7 +217,7 @@ function renderFunding() {
     card.append(meta,fElement('h3','',row.company),fElement('p','funding-subsector',row.subsector));
     const profile = companyResearch.get(row.id);
     if (profile) renderBusinessOverview(card,profile);
-    const facts = fElement('dl','funding-facts',''); fundingFact(facts,'融资轮次',row.round); fundingFact(facts,'本轮金额',row.amount); fundingFact(facts,'估值',row.valuation); fundingFact(facts,'披露状态',row.deal_status); card.append(facts);
+    const facts = fElement('dl','funding-facts',''); fundingFact(facts,'融资轮次',row.round); fundingFact(facts,row.amount_scope === 'combined' ? '多轮合计金额' : row.amount_scope === 'cumulative' ? '累计融资金额' : '本轮金额',row.amount); fundingFact(facts,'估值',row.valuation); fundingFact(facts,'披露状态',row.deal_status); card.append(facts);
     card.append(fElement('p','summary',row.summary));
     const investors = fElement('div','investor-chips','');
     investors.append(fElement('span','funding-label','披露投资方'));
@@ -232,7 +233,10 @@ function renderFunding() {
     if (row.careers_url) details.append(fundingLink('查看招聘入口 ↗',row.careers_url));
     details.append(fElement('p','funding-note',`来源核对于 ${row.checked_on}；公司披露未经过本工具独立财务审计。`)); card.append(details);
     }
-    const bottom = fElement('div','card-bottom funding-links',''); bottom.append(fundingLink('融资公告 ↗',row.source_url),fundingLink('公司官网 ↗',row.company_url),fElement('span','source',row.source_name)); card.append(bottom); fundingUI['funding-cards'].append(card);
+    const bottom = fElement('div','card-bottom funding-links',''); bottom.append(fundingLink('融资披露 ↗',row.source_url));
+    if (row.company_url) bottom.append(fundingLink('公司官网 ↗',row.company_url));
+    else bottom.append(fElement('span','funding-note','公司官网尚未核验'));
+    bottom.append(fElement('span','source',row.source_name)); card.append(bottom); fundingUI['funding-cards'].append(card);
   }
   if (!entries.length) fundingUI['funding-cards'].append(fElement('p','empty',fundingEntries.length ? '当前筛选没有匹配融资。可清除筛选或选择「全部已收录」。观察名单也受时间和其他筛选条件影响。' : '暂无已加载融资信息，请重试加载。'));
   if (focusedWatch) {
@@ -242,7 +246,7 @@ function renderFunding() {
 }
 function csvCell(value) { let cell = fText(value).replace(/[\r\n\t]/g,' '); if (/^[\u0000-\u0020]*[=+@-]/.test(cell)) cell = "'" + cell; return '"' + cell.replace(/"/g,'""') + '"'; }
 function fundingCSV(entries) {
-  const columns = ['公司','国家','赛道','细分方向','公告日期','轮次','本轮金额（原始口径）','估值（非融资额）','披露状态','投资方与角色','业务摘要','观察重点（研究提示）','招聘证据等级','招聘核对日期','公司官网','招聘入口','融资来源','核对日期','主营业务','产品','目标使用方','收费与披露边界','招聘要求摘要','岗位来源','预测依据与期限','基准情景（推断）','乐观情景（推断）','风险情景（推断）','人才方向（推断）','投资观察与条件','验证指标','失效信号'];
+  const columns = ['公司','国家','赛道','细分方向','公告日期','轮次','融资金额（原始口径，合计见说明）','估值（非融资额）','披露状态','投资方与角色','业务摘要','观察重点（研究提示）','招聘证据等级','招聘核对日期','公司官网','招聘入口','融资来源','核对日期','主营业务','产品','目标使用方','收费与披露边界','招聘要求摘要','岗位来源','预测依据与期限','基准情景（推断）','乐观情景（推断）','风险情景（推断）','人才方向（推断）','投资观察与条件','验证指标','失效信号'];
   const rows = entries.map(row => {
     const profile = companyResearch.get(row.id);
     return [row.company,row.country,row.sector,row.subsector,row.announced_on,row.round,row.amount,row.valuation,row.deal_status,row.investors.map(investor => `${investor.name}（${investor.role}）`).join('；'),row.summary,row.research_focus,profile?.hiring.evidence_level || row.hiring_status,profile?.checked_on || row.hiring_checked_on || '',row.company_url,row.careers_url || '',row.source_url,row.checked_on,profile?.business.overview || '',profile?.business.products.join(' / ') || '',profile?.business.customers || '',profile?.business.monetization || '',profile?.hiring.jobs.map(job => `${job.title}：${job.requirements.join(' / ')}`).join('；') || '',profile?.hiring.jobs.map(job => job.url).join('；') || '',profile ? `${profile.forecast.horizon}；${profile.forecast.basis}` : '',profile?.forecast.base || '',profile?.forecast.upside || '',profile?.forecast.downside || '',profile?.forecast.talent.join(' / ') || '',profile?.forecast.opportunity || '',profile?.forecast.checkpoints.join(' / ') || '',profile?.forecast.invalidation || ''];
@@ -259,7 +263,7 @@ async function loadFunding() {
   fundingBusy = true; fundingUI['funding-retry'].disabled = true; fundingUI['funding-status'].textContent = '正在加载融资信息…';
   let stage = 'connection';
   try {
-    const data = await readPublicJSON('./funding-data.json?v=20261012-research2');
+    const data = await readPublicJSON('./funding-data.json?v=20261012-domestic1');
     stage = 'validate';
     fundingEntries = validateFundingData(data);
     stage = 'display';

@@ -1,8 +1,64 @@
 {
   "version": 1,
   "updated_on": "2026-10-12",
-  "coverage": "人工核实的中美科技融资样本；非全市场统计，暂无自动采集。",
+  "coverage": "人工核对的中美科技融资样本，包含公司与投资机构披露、经交叉核对的媒体报道；后台自动发现线索，前台仍人工发布，非全市场统计。",
   "entries": [
+    {
+      "id": "juxie-20261010-aplus",
+      "company": "巨蟹智能",
+      "country": "CN",
+      "sector": "智能硬件",
+      "subsector": "机器人关节模组 / 精密驱动部件",
+      "announced_on": "2026-10-10",
+      "round": "A+ 轮",
+      "round_group": "A",
+      "amount": "超 1 亿元人民币",
+      "valuation": "未披露",
+      "amount_scope": "single",
+      "deal_status": "公司官网确认轮次及金额；日期和投资方来自媒体",
+      "investors": [
+        {
+          "name": "华泰紫金",
+          "role": "领投"
+        },
+        {
+          "name": "德昌电机",
+          "role": "跟投"
+        },
+        {
+          "name": "九号资本",
+          "role": "跟投"
+        },
+        {
+          "name": "自变量机器人",
+          "role": "跟投"
+        },
+        {
+          "name": "科沃斯",
+          "role": "老股东追加"
+        },
+        {
+          "name": "南创投",
+          "role": "老股东追加"
+        }
+      ],
+      "investor_note": "公司官网发展历程确认2026年获超亿元A+轮融资；投资方名单及10月10日报道日期来自投资界。实际完成日期未披露；9月末已有相关报道，不作为两次融资。",
+      "summary": "官网与报道共同支持A+轮及超亿元口径；资金面向机器人部件研发、协同设计及自动化制造。",
+      "research_focus": "关注客户验证、交付与现金流；融资并不能证明收入或盈利。",
+      "company_url": "https://www.juxiedrive.com/",
+      "source_url": "https://m.pedaily.cn/news/570033",
+      "source_name": "投资界（平台报道）",
+      "source_title": "巨蟹智能完成超亿元A+轮融资，专注智能机器人核心零部件 机器人",
+      "checked_on": "2026-10-12",
+      "careers_url": "https://www.juxiedrive.com/Recruitment.html",
+      "hiring_status": "官网公开岗位要求已核验",
+      "hiring_checked_on": "2026-10-12",
+      "verified_roles": [
+        "硬件工程",
+        "嵌入式软件",
+        "运动控制算法"
+      ]
+    },
     {
       "id": "gudea-20261009-seed",
       "company": "GUDEA",
@@ -16,8 +72,14 @@
       "valuation": "未披露",
       "deal_status": "公司新闻稿披露完成融资",
       "investors": [
-        {"name":"Mudita Ventures","role":"联合领投"},
-        {"name":"Collide Capital","role":"联合领投"}
+        {
+          "name": "Mudita Ventures",
+          "role": "联合领投"
+        },
+        {
+          "name": "Collide Capital",
+          "role": "联合领投"
+        }
       ],
       "investor_note": "以公司2026年10月9日新闻稿为准；700万美元是本轮金额，不是累计融资。",
       "summary": "美国叙事智能平台，公司披露完成700万美元种子阶段融资，资金用于产品开发、平台覆盖扩展及企业业务增长。",
@@ -45,11 +107,26 @@
       "valuation": "7.5 亿美元（公告披露）",
       "deal_status": "公司宣布融资",
       "investors": [
-        {"name":"Valor Equity Partners","role":"联合领投者 Antonio Gracias 所属机构"},
-        {"name":"Atreides Management","role":"联合领投者 Gavin Baker 所属机构"},
-        {"name":"Sequoia Capital","role":"参投"},
-        {"name":"Human Capital","role":"参投"},
-        {"name":"EQT","role":"参投"}
+        {
+          "name": "Valor Equity Partners",
+          "role": "联合领投者 Antonio Gracias 所属机构"
+        },
+        {
+          "name": "Atreides Management",
+          "role": "联合领投者 Gavin Baker 所属机构"
+        },
+        {
+          "name": "Sequoia Capital",
+          "role": "参投"
+        },
+        {
+          "name": "Human Capital",
+          "role": "参投"
+        },
+        {
+          "name": "EQT",
+          "role": "参投"
+        }
       ],
       "investor_note": "列示部分披露投资方；官网公告以两位投资人个人署名联合领投。",
       "summary": "为硬件研发团队提供 AI 系统工程平台，本轮资金用于平台能力、工程团队和销售团队扩展。",
@@ -62,7 +139,12 @@
       "careers_url": "https://www.flowengineering.com/careers/",
       "hiring_status": "官网列有岗位（核对时点）",
       "hiring_checked_on": "2026-10-12",
-      "verified_roles": ["企业销售", "解决方案架构", "GTM / 营收运营", "软件工程"]
+      "verified_roles": [
+        "企业销售",
+        "解决方案架构",
+        "GTM / 营收运营",
+        "软件工程"
+      ]
     },
     {
       "id": "efficient-20260929-b",
@@ -77,11 +159,26 @@
       "valuation": "6.5 亿美元（公告披露）",
       "deal_status": "已签署融资协议；交割未核验",
       "investors": [
-        {"name":"TQ Ventures","role":"领投"},
-        {"name":"Eclipse","role":"参投"},
-        {"name":"Union Square Ventures","role":"参投"},
-        {"name":"Toyota Ventures","role":"参投"},
-        {"name":"Giant Ventures","role":"参投"}
+        {
+          "name": "TQ Ventures",
+          "role": "领投"
+        },
+        {
+          "name": "Eclipse",
+          "role": "参投"
+        },
+        {
+          "name": "Union Square Ventures",
+          "role": "参投"
+        },
+        {
+          "name": "Toyota Ventures",
+          "role": "参投"
+        },
+        {
+          "name": "Giant Ventures",
+          "role": "参投"
+        }
       ],
       "investor_note": "列示部分披露投资方。",
       "summary": "资金用于 Electron E1 处理器量产交付，并推进向数据中心性能级别扩展。",
@@ -94,7 +191,12 @@
       "careers_url": "https://job-boards.greenhouse.io/efficientcomputer",
       "hiring_status": "招聘平台列有岗位（核对时点）",
       "hiring_checked_on": "2026-10-12",
-      "verified_roles": ["软件产品经理", "财务负责人", "技术项目管理", "应用工程"]
+      "verified_roles": [
+        "软件产品经理",
+        "财务负责人",
+        "技术项目管理",
+        "应用工程"
+      ]
     },
     {
       "id": "mind-20260917-b",
@@ -109,9 +211,18 @@
       "valuation": "未披露",
       "deal_status": "公司宣布融资",
       "investors": [
-        {"name":"Crosspoint Capital Partners","role":"领投"},
-        {"name":"YL Ventures","role":"参投"},
-        {"name":"Paladin Capital Group","role":"参投"}
+        {
+          "name": "Crosspoint Capital Partners",
+          "role": "领投"
+        },
+        {
+          "name": "YL Ventures",
+          "role": "参投"
+        },
+        {
+          "name": "Paladin Capital Group",
+          "role": "参投"
+        }
       ],
       "investor_note": "按本轮公告披露。",
       "summary": "面向企业 AI 使用场景的数据防泄漏平台，本轮资金用于业务增长及数据安全能力扩展。",
@@ -139,12 +250,30 @@
       "valuation": "超 10 亿美元（估值，非融资额）",
       "deal_status": "公司宣布融资",
       "investors": [
-        {"name":"Vista Equity Partners","role":"领投"},
-        {"name":"Cambium Capital","role":"领投"},
-        {"name":"Emergence Capital","role":"领投"},
-        {"name":"M12","role":"参投"},
-        {"name":"Hitachi","role":"参投"},
-        {"name":"Wipro","role":"参投"}
+        {
+          "name": "Vista Equity Partners",
+          "role": "领投"
+        },
+        {
+          "name": "Cambium Capital",
+          "role": "领投"
+        },
+        {
+          "name": "Emergence Capital",
+          "role": "领投"
+        },
+        {
+          "name": "M12",
+          "role": "参投"
+        },
+        {
+          "name": "Hitachi",
+          "role": "参投"
+        },
+        {
+          "name": "Wipro",
+          "role": "参投"
+        }
       ],
       "investor_note": "列示部分披露投资方；官网未给出本轮融资金额。",
       "summary": "本轮资金用于下一代 Trinity 模型、科研机构合作及开放模型产品体系。",
@@ -172,8 +301,14 @@
       "valuation": "未披露",
       "deal_status": "公司披露完成融资",
       "investors": [
-        {"name":"MTR Lab","role":"联合投资"},
-        {"name":"北极光创投","role":"联合投资"}
+        {
+          "name": "MTR Lab",
+          "role": "联合投资"
+        },
+        {
+          "name": "北极光创投",
+          "role": "联合投资"
+        }
       ],
       "investor_note": "航行资本为财务顾问，不计入投资方。",
       "summary": "资金用于人与 AI Agent 的企业治理平台迭代，以及团队扩充、海外市场和本地交付服务。",
@@ -185,6 +320,90 @@
       "checked_on": "2026-10-12",
       "careers_url": null,
       "hiring_status": "招聘状态未核验",
+      "hiring_checked_on": null,
+      "verified_roles": []
+    },
+    {
+      "id": "jialiang-20260908-cd",
+      "company": "佳量脑科学",
+      "country": "CN",
+      "sector": "智能硬件",
+      "subsector": "植入式脑机接口 / 医疗智能硬件",
+      "announced_on": "2026-09-08",
+      "round": "C 轮及 D 轮（合并披露）",
+      "round_group": "C",
+      "amount": "数亿元人民币（C+D 合计，单轮未拆分）",
+      "valuation": "未披露",
+      "amount_scope": "combined",
+      "deal_status": "投资机构官网披露完成融资",
+      "investors": [
+        {
+          "name": "启明创投",
+          "role": "C轮领投"
+        },
+        {
+          "name": "余杭国投",
+          "role": "C轮继续投资"
+        },
+        {
+          "name": "辰德资本",
+          "role": "C轮继续投资"
+        },
+        {
+          "name": "赛智伯乐",
+          "role": "D轮参与"
+        },
+        {
+          "name": "宽桥恒松",
+          "role": "D轮参与"
+        },
+        {
+          "name": "宁波国资（公告未明确机构全称）",
+          "role": "D轮参与"
+        }
+      ],
+      "investor_note": "启明创投仅领投C轮。D轮由赛智伯乐、宽桥恒松及宁波国资等参与，公告未逐一拆分金额；两轮合并为一条披露，不各记一次合计金额。",
+      "summary": "杭州脑机接口企业连续完成C、D轮，资金用于注册、临床转化、商业化及国际市场布局。",
+      "research_focus": "关注客户验证、交付与现金流；融资并不能证明收入或盈利。",
+      "company_url": null,
+      "source_url": "https://www.qimingvc.com/cn/news/%E5%90%AF%E6%98%8E%E6%98%9F-%E4%BD%B3%E9%87%8F%E8%84%91%E7%A7%91%E5%AD%A6%E8%BF%9E%E7%BB%AD%E5%AE%8C%E6%88%90c%E8%BD%AE%E5%8F%8Ad%E8%BD%AE%E4%B8%A4%E8%BD%AE%E8%9E%8D%E8%B5%84%EF%BC%8C%E5%90%AF%E6%98%8E%E5%88%9B%E6%8A%95%E9%A2%86%E6%8A%95c%E8%BD%AE",
+      "source_name": "启明创投官网（投资机构）",
+      "source_title": "启明星 | 佳量脑科学连续完成C轮及D轮两轮融资，启明创投领投C轮",
+      "checked_on": "2026-10-12",
+      "careers_url": null,
+      "hiring_status": "具体岗位证据不足；不代表没有招聘",
+      "hiring_checked_on": null,
+      "verified_roles": []
+    },
+    {
+      "id": "xinguangjie-20260825-angel",
+      "company": "芯光界",
+      "country": "CN",
+      "sector": "智能硬件",
+      "subsector": "AI 集群光互连 / 硅光芯片与封装",
+      "announced_on": "2026-08-25",
+      "round": "天使轮",
+      "round_group": "OTHER",
+      "amount": "亿元人民币（原公告口径）",
+      "valuation": "未披露",
+      "amount_scope": "single",
+      "deal_status": "投资机构官网披露完成融资",
+      "investors": [
+        {
+          "name": "启明创投",
+          "role": "独家投资"
+        }
+      ],
+      "investor_note": "启明创投独家投资；2026年5月的数千万元种子轮是另一轮，未合并进本次金额。",
+      "summary": "上海光互连企业完成亿元天使轮，资金用于研发、客户验证和团队建设。当前产品对接与验证不等于量产订单。",
+      "research_focus": "关注客户验证、交付与现金流；融资并不能证明收入或盈利。",
+      "company_url": null,
+      "source_url": "https://www.qimingvc.com/cn/news/%E5%90%AF%E6%98%8E%E6%98%9F-%E8%8A%AF%E5%85%89%E7%95%8C%E5%AE%8C%E6%88%90%E4%BA%BF%E5%85%83%E5%A4%A9%E4%BD%BF%E8%BD%AE%E8%9E%8D%E8%B5%84%EF%BC%8C%E5%90%AF%E6%98%8E%E5%88%9B%E6%8A%95%E7%8B%AC%E5%AE%B6%E6%8A%95%E8%B5%84",
+      "source_name": "启明创投官网（投资机构）",
+      "source_title": "启明星 | 芯光界完成亿元天使轮融资，启明创投独家投资",
+      "checked_on": "2026-10-12",
+      "careers_url": null,
+      "hiring_status": "具体岗位证据不足；不代表没有招聘",
       "hiring_checked_on": null,
       "verified_roles": []
     },
@@ -201,10 +420,22 @@
       "valuation": "投后超 63 亿美元（公告披露）",
       "deal_status": "已签署融资协议；交割未核验",
       "investors": [
-        {"name":"IDG 资本","role":"领投"},
-        {"name":"高榕创投","role":"参投"},
-        {"name":"腾讯","role":"战略投资"},
-        {"name":"阿里巴巴","role":"战略投资"}
+        {
+          "name": "IDG 资本",
+          "role": "领投"
+        },
+        {
+          "name": "高榕创投",
+          "role": "参投"
+        },
+        {
+          "name": "腾讯",
+          "role": "战略投资"
+        },
+        {
+          "name": "阿里巴巴",
+          "role": "战略投资"
+        }
       ],
       "investor_note": "融资主体是机器人业务，不是小鹏集团整体融资。",
       "summary": "机器人业务首轮融资，资金用于软硬件研发、模型与数据、量产基地及全球商业化拓展。",
@@ -232,9 +463,18 @@
       "valuation": "未披露",
       "deal_status": "公司披露完成融资",
       "investors": [
-        {"name":"顺为资本","role":"联合投资"},
-        {"name":"松禾资本","role":"联合投资"},
-        {"name":"深创投","role":"联合投资"}
+        {
+          "name": "顺为资本",
+          "role": "联合投资"
+        },
+        {
+          "name": "松禾资本",
+          "role": "联合投资"
+        },
+        {
+          "name": "深创投",
+          "role": "联合投资"
+        }
       ],
       "investor_note": "另有未具名的机器人本体企业战略投资；不补写名称。",
       "summary": "资金用于产品研发、团队搭建和全球市场拓展，覆盖数据采集、管理与模型训练闭环。",
@@ -246,6 +486,58 @@
       "checked_on": "2026-10-12",
       "careers_url": null,
       "hiring_status": "招聘状态未核验",
+      "hiring_checked_on": null,
+      "verified_roles": []
+    },
+    {
+      "id": "blue-emergence-20260730-angelplus",
+      "company": "蓝色涌现",
+      "country": "CN",
+      "sector": "智能硬件",
+      "subsector": "海钓电助力渔轮 / 消费智能硬件",
+      "announced_on": "2026-07-30",
+      "round": "天使+ 轮",
+      "round_group": "OTHER",
+      "amount": "数千万元人民币（未披露精确值）",
+      "valuation": "未披露",
+      "amount_scope": "single",
+      "deal_status": "投资机构官网披露完成融资",
+      "investors": [
+        {
+          "name": "高瓴创投",
+          "role": "联合领投"
+        },
+        {
+          "name": "启明创投",
+          "role": "联合领投"
+        },
+        {
+          "name": "云沐资本",
+          "role": "跟投"
+        },
+        {
+          "name": "高秉强",
+          "role": "早期投资人继续投资"
+        },
+        {
+          "name": "奇绩创坛",
+          "role": "继续投资"
+        },
+        {
+          "name": "松禾创投联创（公告表述）",
+          "role": "继续投资"
+        }
+      ],
+      "investor_note": "高瓴创投与启明创投联合领投；累计超5000万元不是本轮金额。其他披露投资方包括云沐资本及继续投资的早期投资人。",
+      "summary": "国内海洋消费科技企业获天使+轮融资；首款电助力渔轮在公告时处于用户内测，资金面向迭代和销售渠道。",
+      "research_focus": "关注客户验证、交付与现金流；融资并不能证明收入或盈利。",
+      "company_url": null,
+      "source_url": "https://www.qimingvc.com/cn/news/%E5%90%AF%E6%98%8E%E6%98%9F-%E8%93%9D%E8%89%B2%E6%B6%8C%E7%8E%B0%E5%AE%8C%E6%88%90%E6%95%B0%E5%8D%83%E4%B8%87%E5%85%83%E5%A4%A9%E4%BD%BF%E8%BD%AE%E8%9E%8D%E8%B5%84%EF%BC%8C%E5%90%AF%E6%98%8E%E5%88%9B%E6%8A%95%E8%81%94%E5%90%88%E9%A2%86%E6%8A%95",
+      "source_name": "启明创投官网（投资机构）",
+      "source_title": "启明星 | 蓝色涌现完成数千万元天使+轮融资，启明创投联合领投",
+      "checked_on": "2026-10-12",
+      "careers_url": null,
+      "hiring_status": "具体岗位证据不足；不代表没有招聘",
       "hiring_checked_on": null,
       "verified_roles": []
     }
