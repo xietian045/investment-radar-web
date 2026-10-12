@@ -4,9 +4,23 @@ const SUPABASE_URL = 'https://hfigdvpdeihiwakftjhv.supabase.co';
 const PUBLIC_KEY = 'sb_publishable_2ZtZVFA4VqZs4tHSWOFs0A_7S5svq50';
 const PAGE_SIZE = 100;
 const fields = 'id,title,summary,country,category,source_name,source_url,published_at';
-const ui = Object.fromEntries(['search','country','refresh','count','status','events','more','analysis-status'].map(id => [id, document.getElementById(id)]));
+const ui = Object.fromEntries(['search','country','refresh','count','status','events','more','analysis-status','show-routine'].map(id => [id, document.getElementById(id)]));
 let records = [], offset = 0, total = null, busy = false, canLoadMore = false;
 let pilotAnalyses = new Map();
+// Official article bodies reviewed on 2026-10-12: exchange of views only,
+// with no announced policy measure or agreement. Match URL and title together.
+const routineMeetings = new Map([
+  ['https://www.pbc.gov.cn/goutongjiaoliu/113456/113469/2026101011293518009/index.html','中国人民银行行长潘功胜会见法国总统外事顾问博纳'],
+  ['https://www.pbc.gov.cn/goutongjiaoliu/113456/113469/2026100918390137001/index.html','中国人民银行行长潘功胜会见高盛集团总裁兼首席运营官温泽恩'],
+  ['https://www.pbc.gov.cn/goutongjiaoliu/113456/113469/2026092916445869455/index.html','中国人民银行行长潘功胜会见欧盟驻华大使范恺珀'],
+  ['https://www.pbc.gov.cn/goutongjiaoliu/113456/113469/2026092118225220226/index.html','中国人民银行行长潘功胜会见香港特别行政区政府财政司司长陈茂波一行'],
+  ['https://www.pbc.gov.cn/goutongjiaoliu/113456/113469/2026091717202687422/index.html','中国人民银行副行长宣昌能会见贝宝全球执行副总裁艾伦'],
+  ['https://www.pbc.gov.cn/goutongjiaoliu/113456/113469/2026091611280492893/index.html','中国人民银行副行长宣昌能会见伦敦证券交易所集团富时罗素首席执行官菲奥娜·巴塞特']
+]);
+function isRoutineMeeting(row) {
+  const reviewedTitle = routineMeetings.get(safeUrl(row.source_url));
+  return Boolean(reviewedTitle && normalizeText(reviewedTitle) === normalizeText(row.title));
+}
 const names = {US:'美国',CN:'中国',HK:'中国香港',JP:'日本',GB:'英国',UK:'英国',EU:'欧盟',DE:'德国',FR:'法国',KR:'韩国',SG:'新加坡',IN:'印度',CA:'加拿大',AU:'澳大利亚'};
 const titleTranslations = new Map([
   ['Minutes of the Federal Open Market Committee, September 15-16, 2026', '联邦公开市场委员会（FOMC）会议纪要：2026年9月15日至16日'],
@@ -76,7 +90,7 @@ function renderPilot(card,pilot) {
 async function loadPilotAnalyses() {
   const controller = new AbortController(); const timer = setTimeout(() => controller.abort(),12000);
   try {
-    const response = await fetch('./analysis-pilot.json?v=20261012-ai-pilot1',{signal:controller.signal});
+    const response = await fetch('./analysis-pilot.json?v=20261012-filter1',{signal:controller.signal,cache:'no-store'});
     if (!response.ok) throw new Error('Pilot unavailable');
     pilotAnalyses = validatePilotData(await response.json());
     ui['analysis-status'].textContent = `总结与 AI 分析试点 · 已准备 ${pilotAnalyses.size} 篇 · 展开公告内的分析即可查看；其余公告暂未生成。`;
@@ -89,13 +103,16 @@ function dateLabel(value, dateOnly = false) { if (!value) return '日期未标�
 function render() {
   const keyword = ui.search.value.trim().toLocaleLowerCase();
   const country = ui.country.value;
-  const visible = records.filter(row => matches(row,keyword,country));
+  const matching = records.filter(row => matches(row,keyword,country));
+  const hiddenCount = ui['show-routine'].checked ? 0 : matching.filter(isRoutineMeeting).length;
+  const visible = ui['show-routine'].checked ? matching : matching.filter(row => !isRoutineMeeting(row));
   ui.events.replaceChildren();
-  ui.count.textContent = `显示 ${visible.length} 条 · 已加载 ${records.length}${total == null ? '' : ` / ${total}`} 条`;
+  ui.count.textContent = `显示 ${visible.length} 条${hiddenCount ? ` · 隐藏 ${hiddenCount} 条礼节性会见` : ''} · 已加载 ${records.length}${total == null ? '' : ` / ${total}`} 条`;
   for (const row of visible) {
     const card = element('article','card','');
     const meta = element('div','meta','');
     meta.append(element('span','tag',countryName(row.country)));
+    if (isRoutineMeeting(row)) meta.append(element('span','routine-tag','礼节性会见'));
     if (row.category) { const category = element('span','',categoryLabel(row.category)); category.title = text(row.category); meta.append(category); }
     const dateOnly = row.source_name === '中国人民银行';
     const time = element('time','',dateLabel(row.published_at,dateOnly));
@@ -114,7 +131,7 @@ function render() {
     else bottom.append(element('span','source','原文链接不可用'));
     card.append(bottom); ui.events.append(card);
   }
-  if (!visible.length) ui.events.append(element('p','empty', records.length ? '没有符合条件的公告。试试其他关键词或国家。' : '暂无可显示的公告。'));
+  if (!visible.length) ui.events.append(element('p','empty', hiddenCount ? '匹配的公告为已隐藏的礼节性会见，可勾选「显示礼节性会见」回查。' : records.length ? '没有符合条件的公告。试试其他关键词或国家。' : '暂无可显示的公告。'));
   ui.more.hidden = !canLoadMore;
 }
 function updateCountries() {
@@ -148,7 +165,8 @@ async function load(reset = false) {
 }
 ui.search.addEventListener('input',render);
 ui.country.addEventListener('change',render);
-ui.refresh.addEventListener('click',() => load(true));
+ui['show-routine'].addEventListener('change',render);
+ui.refresh.addEventListener('click',() => { load(true); loadPilotAnalyses(); });
 ui.more.addEventListener('click',() => load());
 load(true);
 loadPilotAnalyses();
