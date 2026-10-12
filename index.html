@@ -6,15 +6,15 @@
   <meta name="theme-color" content="#102a43">
   <meta name="description" content="Investment Radar：查看各国官方公告，搜索宏观与科技投资情报。">
   <title>Investment Radar · 投资情报雷达</title>
-  <link rel="stylesheet" href="./styles.css">
-  <script src="./app.js" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=20261012-zh1">
+  <script src="./app.js?v=20261012-zh1" defer></script>
 </head>
 <body>
   <header><div class="wrap brand"><span class="logo" aria-hidden="true">◎</span><div><strong>Investment Radar</strong><span>投资情报雷达</span></div><span class="badge">MVP</span></div></header>
   <main class="wrap">
     <section class="intro"><p class="eyebrow">从官方信息出发</p><h1>把重要公告，放在一起。</h1><p>追踪各国公开公告，快速搜索，并回到原始来源核实信息。</p></section>
     <section class="toolbar" aria-label="公告筛选">
-      <div class="field search"><label for="search">搜索公告</label><input id="search" type="search" placeholder="标题、摘要、来源或分类" autocomplete="off"></div>
+      <div class="field search"><label for="search">搜索公告</label><input id="search" type="search" placeholder="中英文标题、摘要、来源或分类" autocomplete="off"></div>
       <div class="field"><label for="country">国家 / 地区</label><select id="country"><option value="">全部国家 / 地区</option></select></div>
       <button id="refresh" type="button">刷新公告</button>
     </section>
@@ -22,7 +22,7 @@
     <p id="status" class="status" role="status" aria-live="polite">正在读取公告…</p>
     <section id="events" class="events" aria-label="公告列表"></section>
     <button id="more" type="button" hidden>加载更多</button>
-    <footer><p>信息来自公开来源，仅供研究参考。公告时间以北京时间显示。</p><p>搜索与国家筛选仅针对已加载公告；点击「加载更多」可读取更早记录。</p></footer>
+    <footer><p>信息来自公开来源，仅供研究参考。公告时间以北京时间显示。</p><p>中文标题为参考译文，请以官方原文为准；尚无译文的公告显示原标题。</p><p>搜索与国家筛选仅针对已加载公告；点击「加载更多」可读取更早记录。</p></footer>
   </main>
 </body>
 </html>
