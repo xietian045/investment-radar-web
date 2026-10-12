@@ -116,7 +116,7 @@ async function loadCompanyResearch() {
   let stage = 'connection';
   try {
     fundingUI['research-status'].textContent = '正在加载公司业务与招聘研究，连接较慢时会自动重试…';
-    const data = await readPublicJSON('./company-research.json?v=20261012-sectors1');
+    const data = await readPublicJSON('./company-research.json?v=20261012-frontier1');
     stage = 'validate';
     const validated = validateCompanyResearch(data);
     companyResearch = validated; industryInsights = data.industry_insights;
@@ -265,7 +265,7 @@ async function loadFunding() {
   fundingBusy = true; fundingUI['funding-retry'].disabled = true; fundingUI['funding-status'].textContent = '正在加载融资信息…';
   let stage = 'connection';
   try {
-    const data = await readPublicJSON('./funding-data.json?v=20261012-sectors1');
+    const data = await readPublicJSON('./funding-data.json?v=20261012-frontier1');
     stage = 'validate';
     fundingEntries = validateFundingData(data);
     stage = 'display';

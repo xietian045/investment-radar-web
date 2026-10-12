@@ -4,6 +4,45 @@
   "coverage": "关注前沿科技及IP新消费的人工核对融资样本；后台发现线索，前台核对后发布。跨赛道标签不增加融资条目数，非全市场统计。",
   "entries": [
     {
+      "id": "skydefence-20261012-b",
+      "company": "空御科技 / Skydefence",
+      "country": "CN",
+      "sector": "商业航空航天",
+      "sector_tags": [
+        "智能硬件"
+      ],
+      "subsector": "低空安全 / 无人机探测与管控",
+      "announced_on": "2026-10-12",
+      "round": "B 轮",
+      "round_group": "B",
+      "amount": "未披露",
+      "amount_scope": "undisclosed",
+      "valuation": "未披露",
+      "deal_status": "公司官网披露B轮融资落地",
+      "investors": [
+        {
+          "name": "苏州明智智能制造产业投资基金（明智基金）",
+          "role": "本轮战略投资；未披露领投角色"
+        }
+      ],
+      "investor_note": "采用2026年10月12日公司公告，未披露本轮金额或领投角色。武岳峰科创为此前投资方，公告中的寄语不证明其参与本轮；不列作本轮新增投资方。",
+      "summary": "本轮资金用于核心技术迭代及低空安全业务布局，公司把探测设备、系统平台与项目服务组合交付。",
+      "research_focus": "核查实际项目验收、回款、部署效果与售后成本；低空行业增长不能自动转化为公司收入。",
+      "company_url": "https://www.skydefence.cn/",
+      "source_url": "https://www.skydefence.cn/gongsixinwen/202610/625.html",
+      "source_name": "空御科技官网",
+      "source_title": "喜报 | 空御科技完成B轮融资！",
+      "checked_on": "2026-10-12",
+      "careers_url": "https://www.skydefence.cn/jiaruwomen/",
+      "hiring_status": "官网具体岗位要求已核验",
+      "hiring_checked_on": "2026-10-12",
+      "verified_roles": [
+        "射频工程师",
+        "售前工程师",
+        "海外销售经理"
+      ]
+    },
+    {
       "id": "juxie-20261010-aplus",
       "company": "巨蟹智能",
       "country": "CN",
@@ -340,6 +379,86 @@
       "sector_tags": [
         "AI"
       ]
+    },
+    {
+      "id": "tsc-20260910-financing",
+      "company": "鑫精合 / TSC",
+      "country": "CN",
+      "sector": "3D打印",
+      "sector_tags": [
+        "商业航空航天",
+        "智能硬件"
+      ],
+      "subsector": "金属增材制造设备 / 定制打印与加工服务",
+      "announced_on": "2026-09-10",
+      "round": "新一轮融资（官网未标注A/B/C）",
+      "round_group": "OTHER",
+      "amount": "数亿元人民币（官网原始口径）",
+      "amount_scope": "single",
+      "valuation": "未披露",
+      "deal_status": "公司官网披露完成融资",
+      "investors": [
+        {
+          "name": "CMC资本旗下华文清能一期基金",
+          "role": "联合领投"
+        },
+        {
+          "name": "中集资本",
+          "role": "联合领投"
+        },
+        {
+          "name": "智汇基金",
+          "role": "跟投"
+        },
+        {
+          "name": "弘玺资本",
+          "role": "跟投"
+        },
+        {
+          "name": "中和万方",
+          "role": "跟投"
+        },
+        {
+          "name": "中芯聚源",
+          "role": "跟投"
+        },
+        {
+          "name": "明湾资本",
+          "role": "跟投"
+        },
+        {
+          "name": "太平科创",
+          "role": "跟投"
+        },
+        {
+          "name": "宁波人才集团",
+          "role": "跟投"
+        },
+        {
+          "name": "赛领资本",
+          "role": "跟投"
+        },
+        {
+          "name": "南岭创投",
+          "role": "老股东追加"
+        },
+        {
+          "name": "未来宇航资本",
+          "role": "老股东追加"
+        }
+      ],
+      "investor_note": "以公司官网2026年9月10日公告为准，投资界9月15日为转述报道，不记作第二笔。保留“数亿元”，不推算精确金额或补写融资轮次。",
+      "summary": "资金用于扩大金属增材制造产能和技术迭代；公司同时销售设备、承接打印服务，服务航空航天及其他复杂金属零件需求。",
+      "research_focus": "区分正式订单与意向订单；核查良率、产能利用率、单位零件成本和回款。",
+      "company_url": "https://www.tsc-bj.com/",
+      "source_url": "https://www.tsc-bj.com/news/art_c4pfrz",
+      "source_name": "鑫精合官网",
+      "source_title": "鑫精合完成最新一轮数亿元融资，CMC资本、中集资本联合领投",
+      "checked_on": "2026-10-12",
+      "careers_url": "https://www.tsc-bj.com/join",
+      "hiring_status": "有官网招聘入口；本次未取得具体岗位要求",
+      "hiring_checked_on": "2026-10-12",
+      "verified_roles": []
     },
     {
       "id": "jialiang-20260908-cd",
