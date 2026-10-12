@@ -1,13 +1,13 @@
 {
   "version": 1,
   "updated_on": "2026-10-12",
-  "coverage": "人工核对的中美科技融资样本，包含公司与投资机构披露、经交叉核对的媒体报道；后台自动发现线索，前台仍人工发布，非全市场统计。",
+  "coverage": "关注前沿科技及IP新消费的人工核对融资样本；后台发现线索，前台核对后发布。跨赛道标签不增加融资条目数，非全市场统计。",
   "entries": [
     {
       "id": "juxie-20261010-aplus",
       "company": "巨蟹智能",
       "country": "CN",
-      "sector": "智能硬件",
+      "sector": "机器人",
       "subsector": "机器人关节模组 / 精密驱动部件",
       "announced_on": "2026-10-10",
       "round": "A+ 轮",
@@ -57,6 +57,9 @@
         "硬件工程",
         "嵌入式软件",
         "运动控制算法"
+      ],
+      "sector_tags": [
+        "智能硬件"
       ]
     },
     {
@@ -92,7 +95,10 @@
       "careers_url": "https://www.gudea.ai/careers",
       "hiring_status": "有招聘入口；具体岗位待核验",
       "hiring_checked_on": "2026-10-12",
-      "verified_roles": []
+      "verified_roles": [],
+      "sector_tags": [
+        "企业软件"
+      ]
     },
     {
       "id": "flow-20260930-b",
@@ -144,6 +150,9 @@
         "解决方案架构",
         "GTM / 营收运营",
         "软件工程"
+      ],
+      "sector_tags": [
+        "AI"
       ]
     },
     {
@@ -196,6 +205,9 @@
         "财务负责人",
         "技术项目管理",
         "应用工程"
+      ],
+      "sector_tags": [
+        "AI"
       ]
     },
     {
@@ -235,7 +247,10 @@
       "careers_url": "https://mind.io/careers",
       "hiring_status": "有招聘入口；具体岗位待核验",
       "hiring_checked_on": "2026-10-12",
-      "verified_roles": []
+      "verified_roles": [],
+      "sector_tags": [
+        "AI"
+      ]
     },
     {
       "id": "arcee-20260916-b",
@@ -321,7 +336,10 @@
       "careers_url": null,
       "hiring_status": "招聘状态未核验",
       "hiring_checked_on": null,
-      "verified_roles": []
+      "verified_roles": [],
+      "sector_tags": [
+        "AI"
+      ]
     },
     {
       "id": "jialiang-20260908-cd",
@@ -405,13 +423,16 @@
       "careers_url": null,
       "hiring_status": "具体岗位证据不足；不代表没有招聘",
       "hiring_checked_on": null,
-      "verified_roles": []
+      "verified_roles": [],
+      "sector_tags": [
+        "AI"
+      ]
     },
     {
       "id": "xpeng-robotics-20260824-first",
       "company": "小鹏机器人业务",
       "country": "CN",
-      "sector": "智能硬件",
+      "sector": "机器人",
       "subsector": "人形机器人 / 具身智能",
       "announced_on": "2026-08-24",
       "round": "首轮（官网未标注 A/B/C）",
@@ -448,7 +469,11 @@
       "careers_url": "https://xiaopeng.jobs.feishu.cn/index",
       "hiring_status": "集团招聘入口；机器人岗位待核验",
       "hiring_checked_on": "2026-10-12",
-      "verified_roles": []
+      "verified_roles": [],
+      "sector_tags": [
+        "AI",
+        "智能硬件"
+      ]
     },
     {
       "id": "io-ai-20260811-undisclosed",
@@ -487,7 +512,10 @@
       "careers_url": null,
       "hiring_status": "招聘状态未核验",
       "hiring_checked_on": null,
-      "verified_roles": []
+      "verified_roles": [],
+      "sector_tags": [
+        "机器人"
+      ]
     },
     {
       "id": "blue-emergence-20260730-angelplus",

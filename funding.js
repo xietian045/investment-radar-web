@@ -1,7 +1,8 @@
 'use strict';
 const fundingUI = Object.fromEntries(['funding-search','funding-period','funding-country','funding-sector','funding-round','funding-investor','funding-watch-only','funding-clear','funding-export','funding-retry','funding-status','funding-count','funding-cards','funding-sectors','funding-stat-events','funding-stat-companies','funding-stat-investors','watch-notice','research-status','industry-research-cards'].map(id => [id,document.getElementById(id)]));
 const WATCH_KEY = 'investment-radar.funding-watch.v1';
-const sectorRoles = {AI:['产品运营','开发者生态','技术内容','商务拓展'],企业软件:['企业销售','客户成功','解决方案','产品营销'],智能硬件:['项目运营','供应链','产品管理','行业销售']};
+const sectorRoles = {AI:['模型与工程','开发者生态','产品运营','商务拓展'],机器人:['运动控制','嵌入式工程','机器人应用','供应链'],商业航空航天:['飞行器工程','测试与适航','项目交付','供应链'],新能源:['材料与电化学','工艺与制造','系统集成','项目开发'],电力:['电力电子','电网控制','项目工程','运维'], '3D打印':['材料与工艺','设备控制','应用工程','行业销售'],IP新消费:['IP设计与内容','授权管理','产品开发','用户与渠道运营'],企业软件:['企业销售','客户成功','解决方案','产品营销'],智能硬件:['项目运营','供应链','产品管理','行业销售']};
+function fundingSectors(row) { return [...new Set([row.sector,...(row.sector_tags || [])])]; }
 let fundingEntries = [], fundingBusy = false, watchStorageOK = true;
 let companyResearch = new Map(), industryInsights = [], researchBusy = false;
 async function readPublicJSON(url) {
@@ -115,7 +116,7 @@ async function loadCompanyResearch() {
   let stage = 'connection';
   try {
     fundingUI['research-status'].textContent = '正在加载公司业务与招聘研究，连接较慢时会自动重试…';
-    const data = await readPublicJSON('./company-research.json?v=20261012-domestic1');
+    const data = await readPublicJSON('./company-research.json?v=20261012-sectors1');
     stage = 'validate';
     const validated = validateCompanyResearch(data);
     companyResearch = validated; industryInsights = data.industry_insights;
@@ -158,6 +159,7 @@ function validateFundingData(data) {
     for (const key of ['id','company','subsector','round','amount','valuation','deal_status','summary','research_focus','source_name','source_title','hiring_status','investor_note']) if (typeof row[key] !== 'string' || !row[key].trim() || row[key].length > 3000) throw new Error('Invalid funding text');
     if (!fUrl(row.source_url) || (row.company_url && !fUrl(row.company_url)) || (row.careers_url && !fUrl(row.careers_url))) throw new Error('Invalid funding URL');
     if (row.amount_scope && !['single','combined','cumulative','undisclosed'].includes(row.amount_scope)) throw new Error('Invalid amount scope');
+    if (row.sector_tags !== undefined && (!Array.isArray(row.sector_tags) || row.sector_tags.length > Object.keys(sectorRoles).length || row.sector_tags.some(sector => !Object.hasOwn(sectorRoles,sector)) || new Set(row.sector_tags).size !== row.sector_tags.length)) throw new Error('Invalid sector tags');
     if (!Array.isArray(row.investors) || row.investors.length > 50 || row.investors.some(investor => !investor || typeof investor.name !== 'string' || !investor.name.trim() || typeof investor.role !== 'string')) throw new Error('Invalid investors');
     if (!Array.isArray(row.verified_roles) || row.verified_roles.some(role => typeof role !== 'string')) throw new Error('Invalid roles');
     if (row.hiring_checked_on && !validDay(row.hiring_checked_on)) throw new Error('Invalid hiring date');
@@ -171,10 +173,10 @@ function fundingFilters() { return {keyword:fundingUI['funding-search'].value.tr
 function selectFunding(entries,filters,today = beijingToday()) {
   const cutoff = filters.period === 'all' ? '' : cutoffDay(today,Number(filters.period) || 90);
   return entries.filter(row => {
-    const search = [row.company,row.sector,row.subsector,row.summary,row.round,row.research_focus,row.country === 'CN' ? '中国' : '美国',...row.investors.map(investor => investor.name),profileSearchText(companyResearch.get(row.id))].join(' ').toLocaleLowerCase();
+    const search = [row.company,...fundingSectors(row),row.subsector,row.summary,row.round,row.research_focus,row.country === 'CN' ? '中国' : '美国',...row.investors.map(investor => investor.name),profileSearchText(companyResearch.get(row.id))].join(' ').toLocaleLowerCase();
     return row.announced_on <= today && (!cutoff || row.announced_on >= cutoff)
       && (!filters.keyword || search.includes(filters.keyword)) && (!filters.country || row.country === filters.country)
-      && (!filters.sector || row.sector === filters.sector)
+      && (!filters.sector || fundingSectors(row).includes(filters.sector))
       && (!filters.round || (filters.round === 'ABC' ? ['A','B','C'].includes(row.round_group) : row.round_group === filters.round))
       && (!filters.investor || row.investors.some(investor => investor.name === filters.investor))
       && (!filters.watchOnly || watchlist.has(row.id));
@@ -199,7 +201,7 @@ function renderFunding() {
   fundingUI['funding-export'].disabled = !entries.length;
   fundingUI['funding-sectors'].replaceChildren();
   for (const sector of Object.keys(sectorRoles)) {
-    const count = entries.filter(row => row.sector === sector).length;
+    const count = entries.filter(row => fundingSectors(row).includes(sector)).length;
     const button = fElement('button','sector-button',''); button.type = 'button';
     button.append(fElement('span','',sector),fElement('strong','',`${count} 条`));
     button.setAttribute('aria-pressed',String(fundingUI['funding-sector'].value === sector));
@@ -210,7 +212,7 @@ function renderFunding() {
   for (const row of entries) {
     const card = fElement('article','card funding-card','');
     const meta = fElement('div','meta','');
-    meta.append(fElement('span','tag',row.country === 'CN' ? '中国 · CN' : '美国 · US'),fElement('span','',row.sector));
+    meta.append(fElement('span','tag',row.country === 'CN' ? '中国 · CN' : '美国 · US'),fElement('span','',fundingSectors(row).join(' · ')));
     const time = fElement('time','',row.announced_on); time.dateTime = row.announced_on; meta.append(time);
     const saved = watchlist.has(row.id), watch = fElement('button','watch-button',saved ? '已在观察名单' : '加入观察名单');
     watch.type = 'button'; watch.dataset.watchId = row.id; watch.setAttribute('aria-pressed',String(saved)); watch.setAttribute('aria-label',`${saved ? '移出' : '加入'}观察名单：${row.company}`); watch.addEventListener('click',() => toggleWatch(row.id)); meta.append(watch);
@@ -238,7 +240,7 @@ function renderFunding() {
     else bottom.append(fElement('span','funding-note','公司官网尚未核验'));
     bottom.append(fElement('span','source',row.source_name)); card.append(bottom); fundingUI['funding-cards'].append(card);
   }
-  if (!entries.length) fundingUI['funding-cards'].append(fElement('p','empty',fundingEntries.length ? '当前筛选没有匹配融资。可清除筛选或选择「全部已收录」。观察名单也受时间和其他筛选条件影响。' : '暂无已加载融资信息，请重试加载。'));
+  if (!entries.length) fundingUI['funding-cards'].append(fElement('p','empty',fundingEntries.length ? '当前筛选暂无已收录融资。可清除筛选或选择「全部已收录」；新赛道会在信息核对后逐步补充，暂无条目不代表没有融资活动。' : '暂无已加载融资信息，请重试加载。'));
   if (focusedWatch) {
     const remaining = [...fundingUI['funding-cards'].querySelectorAll('.watch-button')].find(button => button.dataset.watchId === focusedWatch);
     (remaining || fundingUI['funding-watch-only']).focus();
@@ -249,7 +251,7 @@ function fundingCSV(entries) {
   const columns = ['公司','国家','赛道','细分方向','公告日期','轮次','融资金额（原始口径，合计见说明）','估值（非融资额）','披露状态','投资方与角色','业务摘要','观察重点（研究提示）','招聘证据等级','招聘核对日期','公司官网','招聘入口','融资来源','核对日期','主营业务','产品','目标使用方','收费与披露边界','招聘要求摘要','岗位来源','预测依据与期限','基准情景（推断）','乐观情景（推断）','风险情景（推断）','人才方向（推断）','投资观察与条件','验证指标','失效信号'];
   const rows = entries.map(row => {
     const profile = companyResearch.get(row.id);
-    return [row.company,row.country,row.sector,row.subsector,row.announced_on,row.round,row.amount,row.valuation,row.deal_status,row.investors.map(investor => `${investor.name}（${investor.role}）`).join('；'),row.summary,row.research_focus,profile?.hiring.evidence_level || row.hiring_status,profile?.checked_on || row.hiring_checked_on || '',row.company_url,row.careers_url || '',row.source_url,row.checked_on,profile?.business.overview || '',profile?.business.products.join(' / ') || '',profile?.business.customers || '',profile?.business.monetization || '',profile?.hiring.jobs.map(job => `${job.title}：${job.requirements.join(' / ')}`).join('；') || '',profile?.hiring.jobs.map(job => job.url).join('；') || '',profile ? `${profile.forecast.horizon}；${profile.forecast.basis}` : '',profile?.forecast.base || '',profile?.forecast.upside || '',profile?.forecast.downside || '',profile?.forecast.talent.join(' / ') || '',profile?.forecast.opportunity || '',profile?.forecast.checkpoints.join(' / ') || '',profile?.forecast.invalidation || ''];
+    return [row.company,row.country,fundingSectors(row).join(' / '),row.subsector,row.announced_on,row.round,row.amount,row.valuation,row.deal_status,row.investors.map(investor => `${investor.name}（${investor.role}）`).join('；'),row.summary,row.research_focus,profile?.hiring.evidence_level || row.hiring_status,profile?.checked_on || row.hiring_checked_on || '',row.company_url,row.careers_url || '',row.source_url,row.checked_on,profile?.business.overview || '',profile?.business.products.join(' / ') || '',profile?.business.customers || '',profile?.business.monetization || '',profile?.hiring.jobs.map(job => `${job.title}：${job.requirements.join(' / ')}`).join('；') || '',profile?.hiring.jobs.map(job => job.url).join('；') || '',profile ? `${profile.forecast.horizon}；${profile.forecast.basis}` : '',profile?.forecast.base || '',profile?.forecast.upside || '',profile?.forecast.downside || '',profile?.forecast.talent.join(' / ') || '',profile?.forecast.opportunity || '',profile?.forecast.checkpoints.join(' / ') || '',profile?.forecast.invalidation || ''];
   });
   return '\uFEFF' + [columns,...rows].map(row => row.map(csvCell).join(',')).join('\r\n');
 }
@@ -263,7 +265,7 @@ async function loadFunding() {
   fundingBusy = true; fundingUI['funding-retry'].disabled = true; fundingUI['funding-status'].textContent = '正在加载融资信息…';
   let stage = 'connection';
   try {
-    const data = await readPublicJSON('./funding-data.json?v=20261012-domestic1');
+    const data = await readPublicJSON('./funding-data.json?v=20261012-sectors1');
     stage = 'validate';
     fundingEntries = validateFundingData(data);
     stage = 'display';

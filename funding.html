@@ -7,7 +7,7 @@
   <meta name="description" content="Investment Radar 融资雷达：按赛道、轮次和投资机构浏览中美科技融资，建立公司观察名单。">
   <title>融资雷达 · Investment Radar</title>
   <link rel="stylesheet" href="./styles.css?v=20261012-research1">
-  <script src="./funding.js?v=20261012-domestic1" defer></script>
+  <script src="./funding.js?v=20261012-sectors1" defer></script>
 </head>
 <body>
   <header><div class="wrap brand"><span class="logo" aria-hidden="true">◎</span><div><strong>Investment Radar</strong><span>投资情报雷达</span></div><span class="badge">MVP</span></div></header>
@@ -20,7 +20,7 @@
       <div class="field funding-search"><label for="funding-search">搜索公司 / 机构 / 业务 / 技能</label><input id="funding-search" type="search" placeholder="例如：客户部署、编译器、数据安全" autocomplete="off"></div>
       <div class="field"><label for="funding-period">公告时间</label><select id="funding-period"><option value="90">近 90 天</option><option value="30">近 30 天</option><option value="180">近 180 天</option><option value="all">全部已收录</option></select></div>
       <div class="field"><label for="funding-country">国家 / 地区</label><select id="funding-country"><option value="">全部</option><option value="CN">中国</option><option value="US">美国</option></select></div>
-      <div class="field"><label for="funding-sector">赛道</label><select id="funding-sector"><option value="">全部赛道</option><option value="AI">AI</option><option value="企业软件">企业软件</option><option value="智能硬件">智能硬件</option></select></div>
+      <div class="field"><label for="funding-sector">赛道</label><select id="funding-sector"><option value="">全部赛道</option><option value="AI">AI</option><option value="机器人">机器人</option><option value="商业航空航天">商业航空航天</option><option value="新能源">新能源</option><option value="电力">电力</option><option value="3D打印">3D 打印</option><option value="IP新消费">IP 新消费</option><option value="企业软件">企业软件</option><option value="智能硬件">智能硬件</option></select></div>
       <div class="field"><label for="funding-round">轮次</label><select id="funding-round"><option value="">全部轮次</option><option value="ABC">A / B / C 系列</option><option value="A">A 系列</option><option value="B">B 系列（含 B+）</option><option value="C">C 系列</option><option value="OTHER">其他 / 未披露</option></select></div>
       <div class="field"><label for="funding-investor">投资机构</label><select id="funding-investor"><option value="">全部已收录机构</option></select></div>
       <div class="funding-actions"><label class="watch-toggle" for="funding-watch-only"><input id="funding-watch-only" type="checkbox">仅看观察名单</label><div><button id="funding-clear" type="button" class="secondary-button">清除筛选</button><button id="funding-export" type="button" disabled>导出当前清单</button><button id="funding-retry" type="button">重试加载</button></div></div>
@@ -28,7 +28,7 @@
     </section>
     <section class="funding-stats" aria-label="筛选结果统计"><div><span>融资公告</span><strong id="funding-stat-events">0</strong></div><div><span>涉及公司</span><strong id="funding-stat-companies">0</strong></div><div><span>披露投资方</span><strong id="funding-stat-investors">0</strong></div></section>
     <details class="industry-research"><summary>行业方向 · 人才需求 · 投资观察</summary><p class="funding-note">来自已收录公司样本的条件推断，不是全行业预测；以下观察不随筛选变化。</p><div id="industry-research-cards" class="industry-research-grid"></div></details>
-    <section class="sector-section" aria-label="样本赛道分布"><h2>样本赛道分布</h2><p class="funding-note">按当前筛选的公告数统计；点击赛道进一步筛选。仅反映已收录样本，非全市场排名。</p><div id="funding-sectors" class="sector-grid"></div></section>
+    <section class="sector-section" aria-label="样本赛道分布"><h2>关注赛道与样本分布</h2><p class="funding-note">关注 AI、机器人、商业航空航天、新能源、电力、3D 打印及 IP 新消费，并保留企业软件和智能硬件。商业航空航天包括 eVTOL、无人机、火箭与卫星。IP 新消费重点关注原创角色、潮玩及有可核实授权的消费品牌。</p><p class="funding-note">点击赛道筛选。一家公司可关联多个赛道，赛道数量不可相加作为融资总数；仅反映当前已收录样本。新赛道暂无样本时显示 0 条。</p><div id="funding-sectors" class="sector-grid"></div></section>
     <div class="results-heading"><h2>融资与公司清单</h2><span id="funding-count" aria-live="polite"></span></div>
     <section id="funding-cards" class="events" aria-label="融资公告列表"></section>
     <aside class="funding-guide"><h2>把融资线索变成研究清单</h2><ol><li>先读主营业务与客户场景，再核对轮次、融资主体与资金用途。</li><li>把实际岗位要求与产品计划交叉验证，区分披露事实、人才方向推断与证据缺口。</li><li>用基准、乐观与风险情景形成观察清单，再通过客户付费、交付、现金流和估值检查投资可行性。</li></ol><p>岗位可能是替补或长期招聘；没有跨期数据就不判断扩招速度。样本中的私营公司通常无法直接在公开市场买入；融资信息不等同于投资准入、估值合理或买入信号。</p></aside>
