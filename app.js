@@ -36,7 +36,7 @@ function countryName(code) { return names[code] ? `${names[code]} · ${code}` : 
 function text(value) { return value == null ? '' : String(value); }
 function element(tag, className, value) { const node = document.createElement(tag); node.className = className; node.textContent = value; return node; }
 function safeUrl(value) { try { const url = new URL(value); return ['https:','http:'].includes(url.protocol) && !url.username && !url.password ? url.href : null; } catch { return null; } }
-function dateLabel(value) { if (!value) return '日期未标注'; const date = new Date(value); return Number.isNaN(date.getTime()) ? '日期未标注' : new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date); }
+function dateLabel(value, dateOnly = false) { if (!value) return '日期未标注'; const date = new Date(value); const options = {timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}; if (!dateOnly) Object.assign(options,{hour:'2-digit',minute:'2-digit',hour12:false}); return Number.isNaN(date.getTime()) ? '日期未标注' : new Intl.DateTimeFormat('zh-CN',options).format(date); }
 function render() {
   const keyword = ui.search.value.trim().toLocaleLowerCase();
   const country = ui.country.value;
@@ -48,7 +48,8 @@ function render() {
     const meta = element('div','meta','');
     meta.append(element('span','tag',countryName(row.country)));
     if (row.category) { const category = element('span','',categoryLabel(row.category)); category.title = text(row.category); meta.append(category); }
-    const time = element('time','',dateLabel(row.published_at));
+    const dateOnly = row.source_name === '中国人民银行';
+    const time = element('time','',dateLabel(row.published_at,dateOnly));
     if (row.published_at && !Number.isNaN(new Date(row.published_at).getTime())) time.dateTime = new Date(row.published_at).toISOString();
     meta.append(time);
     const chineseTitle = translatedTitle(row);
