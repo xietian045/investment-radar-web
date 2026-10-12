@@ -4,8 +4,9 @@ const SUPABASE_URL = 'https://hfigdvpdeihiwakftjhv.supabase.co';
 const PUBLIC_KEY = 'sb_publishable_2ZtZVFA4VqZs4tHSWOFs0A_7S5svq50';
 const PAGE_SIZE = 100;
 const fields = 'id,title,summary,country,category,source_name,source_url,published_at';
-const ui = Object.fromEntries(['search','country','refresh','count','status','events','more'].map(id => [id, document.getElementById(id)]));
+const ui = Object.fromEntries(['search','country','refresh','count','status','events','more','analysis-status'].map(id => [id, document.getElementById(id)]));
 let records = [], offset = 0, total = null, busy = false, canLoadMore = false;
+let pilotAnalyses = new Map();
 const names = {US:'美国',CN:'中国',HK:'中国香港',JP:'日本',GB:'英国',UK:'英国',EU:'欧盟',DE:'德国',FR:'法国',KR:'韩国',SG:'新加坡',IN:'印度',CA:'加拿大',AU:'澳大利亚'};
 const titleTranslations = new Map([
   ['Minutes of the Federal Open Market Committee, September 15-16, 2026', '联邦公开市场委员会（FOMC）会议纪要：2026年9月15日至16日'],
@@ -30,12 +31,60 @@ function translatedTitle(row) { return normalizedTitles.get(normalizeText(row.ti
 function categoryLabel(value) { return categoryTranslations.get(value) || text(value); }
 function sourceLabel(value) { const translated = sourceTranslations.get(value); return translated ? `${translated} · ${value}` : text(value) || '来源未标注'; }
 function matches(row, keyword, country) {
-  return (!country || row.country === country) && (!keyword || [row.title,translatedTitle(row),row.summary,row.category,categoryLabel(row.category),row.source_name,sourceLabel(row.source_name),row.country,countryName(row.country)].some(value => text(value).toLocaleLowerCase().includes(keyword)));
+  const pilot = pilotFor(row);
+  return (!country || row.country === country) && (!keyword || [row.title,translatedTitle(row),row.summary,row.category,categoryLabel(row.category),row.source_name,sourceLabel(row.source_name),row.country,countryName(row.country),pilot?.summary,pilot?.impact,...(pilot?.watchlist || []),...(pilot?.risks || []),...(pilot?.checkpoints || []),pilot?.limits].some(value => text(value).toLocaleLowerCase().includes(keyword)));
 }
 function countryName(code) { return names[code] ? `${names[code]} · ${code}` : code || '未标注'; }
 function text(value) { return value == null ? '' : String(value); }
 function element(tag, className, value) { const node = document.createElement(tag); node.className = className; node.textContent = value; return node; }
 function safeUrl(value) { try { const url = new URL(value); return ['https:','http:'].includes(url.protocol) && !url.username && !url.password ? url.href : null; } catch { return null; } }
+function pilotFor(row) { const pilot = pilotAnalyses.get(safeUrl(row.source_url)); return pilot && normalizeText(pilot.source_title) === normalizeText(row.title) ? pilot : null; }
+function validatePilotData(data) {
+  if (data?.version !== 1 || !Array.isArray(data.entries) || data.entries.length > 50) throw new Error('Invalid pilot data');
+  const entries = new Map();
+  for (const entry of data.entries) {
+    if (!entry || !safeUrl(entry.source_url)) throw new Error('Invalid pilot source');
+    for (const key of ['source_title','reviewed_on','summary','impact','limits']) if (typeof entry[key] !== 'string' || !entry[key].trim() || entry[key].length > 3000) throw new Error('Invalid pilot text');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(entry.reviewed_on)) throw new Error('Invalid pilot date');
+    for (const key of ['watchlist','risks','checkpoints']) if (!Array.isArray(entry[key]) || entry[key].length > 8 || entry[key].some(value => typeof value !== 'string' || value.length > 1000)) throw new Error('Invalid pilot list');
+    const url = safeUrl(entry.source_url);
+    if (entries.has(url)) throw new Error('Duplicate pilot source');
+    entries.set(url,entry);
+  }
+  return entries;
+}
+function addAnalysisSection(details,title,values) {
+  details.append(element('h4','',title));
+  const list = element('ul','analysis-list','');
+  values.forEach(value => list.append(element('li','',value)));
+  details.append(list);
+}
+function renderPilot(card,pilot) {
+  const summary = element('section','pilot-summary','');
+  summary.append(element('h4','','内容总结'),element('p','',pilot.summary));
+  card.append(summary);
+  const details = element('details','pilot-analysis','');
+  details.append(element('summary','','AI 投资分析 · 展开查看'));
+  details.append(element('p','analysis-meta',`试点内容 · 整理于 ${pilot.reviewed_on} · 未接入实时行情`));
+  details.append(element('h4','','可能的影响渠道'),element('p','',pilot.impact));
+  addAnalysisSection(details,'相关研究方向',pilot.watchlist);
+  addAnalysisSection(details,'风险与反向情景',pilot.risks);
+  addAnalysisSection(details,'后续观察指标',pilot.checkpoints);
+  details.append(element('h4','','分析边界'),element('p','analysis-limits',pilot.limits));
+  card.append(details);
+}
+async function loadPilotAnalyses() {
+  const controller = new AbortController(); const timer = setTimeout(() => controller.abort(),12000);
+  try {
+    const response = await fetch('./analysis-pilot.json?v=20261012-ai-pilot1',{signal:controller.signal});
+    if (!response.ok) throw new Error('Pilot unavailable');
+    pilotAnalyses = validatePilotData(await response.json());
+    ui['analysis-status'].textContent = `总结与 AI 分析试点 · 已准备 ${pilotAnalyses.size} 篇 · 展开公告内的分析即可查看；其余公告暂未生成。`;
+    render();
+  } catch {
+    ui['analysis-status'].textContent = '试点分析暂时无法加载，公告列表仍可使用。请检查更新包中的 analysis-pilot.json 已上传，或稍后刷新页面。';
+  } finally { clearTimeout(timer); }
+}
 function dateLabel(value, dateOnly = false) { if (!value) return '日期未标注'; const date = new Date(value); const options = {timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}; if (!dateOnly) Object.assign(options,{hour:'2-digit',minute:'2-digit',hour12:false}); return Number.isNaN(date.getTime()) ? '日期未标注' : new Intl.DateTimeFormat('zh-CN',options).format(date); }
 function render() {
   const keyword = ui.search.value.trim().toLocaleLowerCase();
@@ -55,7 +104,9 @@ function render() {
     const chineseTitle = translatedTitle(row);
     card.append(meta,element('h3','',chineseTitle || text(row.title) || '未命名公告'));
     if (chineseTitle) { const original = element('p','original-title',text(row.title)); original.lang = 'en'; card.append(original); }
-    if (row.summary && normalizeText(row.summary) !== normalizeText(row.title)) card.append(element('p','summary',text(row.summary)));
+    const pilot = pilotFor(row);
+    if (pilot) renderPilot(card,pilot);
+    else if (row.summary && normalizeText(row.summary) !== normalizeText(row.title)) card.append(element('p','summary',text(row.summary)));
     const bottom = element('div','card-bottom','');
     bottom.append(element('span','source',sourceLabel(row.source_name)));
     const url = safeUrl(row.source_url);
@@ -100,3 +151,4 @@ ui.country.addEventListener('change',render);
 ui.refresh.addEventListener('click',() => load(true));
 ui.more.addEventListener('click',() => load());
 load(true);
+loadPilotAnalyses();
