@@ -7,7 +7,7 @@
   <meta name="description" content="Investment Radar 融资雷达：按赛道、轮次和投资机构浏览中美科技融资，建立公司观察名单。">
   <title>融资雷达 · Investment Radar</title>
   <link rel="stylesheet" href="./styles.css?v=20261012-research1">
-  <script src="./funding.js?v=20261012-research1" defer></script>
+  <script src="./funding.js?v=20261012-research2" defer></script>
 </head>
 <body>
   <header><div class="wrap brand"><span class="logo" aria-hidden="true">◎</span><div><strong>Investment Radar</strong><span>投资情报雷达</span></div><span class="badge">MVP</span></div></header>
@@ -23,7 +23,7 @@
       <div class="field"><label for="funding-sector">赛道</label><select id="funding-sector"><option value="">全部赛道</option><option value="AI">AI</option><option value="企业软件">企业软件</option><option value="智能硬件">智能硬件</option></select></div>
       <div class="field"><label for="funding-round">轮次</label><select id="funding-round"><option value="">全部轮次</option><option value="ABC">A / B / C 系列</option><option value="A">A 系列</option><option value="B">B 系列（含 B+）</option><option value="C">C 系列</option><option value="OTHER">其他 / 未披露</option></select></div>
       <div class="field"><label for="funding-investor">投资机构</label><select id="funding-investor"><option value="">全部已收录机构</option></select></div>
-      <div class="funding-actions"><label class="watch-toggle" for="funding-watch-only"><input id="funding-watch-only" type="checkbox">仅看观察名单</label><div><button id="funding-clear" type="button" class="secondary-button">清除筛选</button><button id="funding-export" type="button" disabled>导出当前清单</button><button id="funding-retry" type="button" hidden>重试加载</button></div></div>
+      <div class="funding-actions"><label class="watch-toggle" for="funding-watch-only"><input id="funding-watch-only" type="checkbox">仅看观察名单</label><div><button id="funding-clear" type="button" class="secondary-button">清除筛选</button><button id="funding-export" type="button" disabled>导出当前清单</button><button id="funding-retry" type="button">重试加载</button></div></div>
       <p id="watch-notice" class="funding-note" role="status" aria-live="polite">观察名单保存在当前浏览器，不跨设备同步。</p>
     </section>
     <section class="funding-stats" aria-label="筛选结果统计"><div><span>融资公告</span><strong id="funding-stat-events">0</strong></div><div><span>涉及公司</span><strong id="funding-stat-companies">0</strong></div><div><span>披露投资方</span><strong id="funding-stat-investors">0</strong></div></section>

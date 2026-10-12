@@ -3,7 +3,27 @@ const fundingUI = Object.fromEntries(['funding-search','funding-period','funding
 const WATCH_KEY = 'investment-radar.funding-watch.v1';
 const sectorRoles = {AI:['产品运营','开发者生态','技术内容','商务拓展'],企业软件:['企业销售','客户成功','解决方案','产品营销'],智能硬件:['项目运营','供应链','产品管理','行业销售']};
 let fundingEntries = [], fundingBusy = false, watchStorageOK = true;
-let companyResearch = new Map(), industryInsights = [];
+let companyResearch = new Map(), industryInsights = [], researchBusy = false;
+async function readPublicJSON(url) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(),20000);
+    try {
+      const response = await fetch(url,{signal:controller.signal,cache:'no-store'});
+      if (!response.ok) { const error = new Error(`HTTP ${response.status}`); error.kind = 'connection'; throw error; }
+      try { return await response.json(); }
+      catch { const error = new Error('Invalid JSON response'); error.kind = 'content'; throw error; }
+    } catch (error) {
+      if (attempt === 1) { if (!error.kind) error.kind = 'connection'; throw error; }
+    } finally { clearTimeout(timer); }
+    await new Promise(resolve => setTimeout(resolve,700));
+  }
+}
+function loadingReason(error,stage) {
+  if (stage === 'display') return '页面展示暂时出现问题';
+  if (stage === 'validate' || error.kind === 'content') return '信息内容未能通过检查';
+  return error.name === 'AbortError' ? '连接超时' : '网络连接或文件读取失败';
+}
 function validateCompanyResearch(data) {
   if (data?.version !== 1 || !validDay(data.updated_on) || typeof data.method !== 'string' || !Array.isArray(data.profiles) || data.profiles.length > 1000 || !Array.isArray(data.industry_insights) || data.industry_insights.length > 10) throw new Error('Invalid research data');
   const result = new Map();
@@ -90,18 +110,25 @@ function renderIndustryResearch() {
   if (!industryInsights.length) fundingUI['industry-research-cards'].append(fElement('p','funding-note','行业研究暂未加载，融资列表仍可使用。'));
 }
 async function loadCompanyResearch() {
-  const controller = new AbortController(), timer = setTimeout(() => controller.abort(),15000);
+  if (researchBusy) return;
+  researchBusy = true;
+  let stage = 'connection';
   try {
-    const response = await fetch('./company-research.json?v=20261012-research1',{signal:controller.signal,cache:'no-store'});
-    if (!response.ok) throw new Error('Research unavailable');
-    const data = await response.json(); companyResearch = validateCompanyResearch(data); industryInsights = data.industry_insights;
+    fundingUI['research-status'].textContent = '正在加载公司业务与招聘研究，连接较慢时会自动重试…';
+    const data = await readPublicJSON('./company-research.json?v=20261012-research2');
+    stage = 'validate';
+    const validated = validateCompanyResearch(data);
+    companyResearch = validated; industryInsights = data.industry_insights;
+    stage = 'display';
     const verified = [...companyResearch.values()].filter(profile => profile.hiring.evidence_level === '岗位要求已核验').length;
     const directional = [...companyResearch.values()].filter(profile => profile.hiring.evidence_level === '仅招聘方向介绍').length;
     fundingUI['research-status'].textContent = `公司研究 · ${companyResearch.size} 家主营概况 · ${verified} 家有已核验岗位要求 · ${directional} 家仅有招聘方向介绍 · 整理于 ${data.updated_on}。发展情景是条件推断，不保证结果。`;
     renderFunding();
-  } catch {
-    fundingUI['research-status'].textContent = '公司研究暂时无法加载，融资信息仍可使用。请检查 company-research.json 已上传至仓库根目录后刷新。';
-  } finally { clearTimeout(timer); }
+  } catch (error) {
+    console.error('Company research load failed',stage,error.name,error.message);
+    fundingUI['research-status'].textContent = `公司研究暂时无法加载：${loadingReason(error,stage)}。请点击「重试加载」；已加载内容会保留。`;
+    fundingUI['funding-retry'].hidden = false;
+  } finally { researchBusy = false; }
 }
 function fText(value) { return value == null ? '' : String(value); }
 function fElement(tag, className, value) { const node = document.createElement(tag); node.className = className; node.textContent = value; return node; }
@@ -230,17 +257,20 @@ function exportFunding() {
 async function loadFunding() {
   if (fundingBusy) return;
   fundingBusy = true; fundingUI['funding-retry'].disabled = true; fundingUI['funding-status'].textContent = '正在加载融资信息…';
-  const controller = new AbortController(), timer = setTimeout(() => controller.abort(),15000);
+  let stage = 'connection';
   try {
-    const response = await fetch('./funding-data.json?v=20261012-research1',{signal:controller.signal,cache:'no-store'});
-    if (!response.ok) throw new Error('Funding unavailable');
-    const data = await response.json(); fundingEntries = validateFundingData(data); updateInvestorOptions(); renderFunding();
+    const data = await readPublicJSON('./funding-data.json?v=20261012-research2');
+    stage = 'validate';
+    fundingEntries = validateFundingData(data);
+    stage = 'display';
+    updateInvestorOptions(); renderFunding();
     fundingUI['funding-status'].textContent = `人工核实样本 · 最近整理 ${data.updated_on} · 当前列表经核验后人工发布；自动发现的线索不直接上线。非全市场统计。`;
-    fundingUI['funding-retry'].hidden = true;
-  } catch {
-    fundingUI['funding-status'].textContent = '融资数据暂时无法加载，请检查 funding-data.json 已上传至仓库根目录，然后点击重试。' + (fundingEntries.length ? ' 当前保留已加载记录。' : '');
     fundingUI['funding-retry'].hidden = false;
-  } finally { clearTimeout(timer); fundingBusy = false; fundingUI['funding-retry'].disabled = false; }
+  } catch (error) {
+    console.error('Funding load failed',stage,error.name,error.message);
+    fundingUI['funding-status'].textContent = `融资信息暂时无法加载：${loadingReason(error,stage)}。请点击「重试加载」。` + (fundingEntries.length ? ' 当前保留已加载记录。' : '');
+    fundingUI['funding-retry'].hidden = false;
+  } finally { fundingBusy = false; fundingUI['funding-retry'].disabled = false; }
 }
 fundingUI['funding-search'].addEventListener('input',renderFunding);
 for (const id of ['funding-period','funding-country','funding-sector','funding-round','funding-investor','funding-watch-only']) fundingUI[id].addEventListener('change',renderFunding);
